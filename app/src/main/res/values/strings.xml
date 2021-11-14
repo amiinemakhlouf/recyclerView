@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">hindi</string>
+    <string name="textview">TextView</string>
+    <string name="title">title</string>
+    <string name="enter_the_title">enter the title</string>
+    <string name="enter_your_notes">enter your notes</string>
+</resources>
