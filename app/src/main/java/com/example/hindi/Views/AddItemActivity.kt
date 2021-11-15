@@ -21,7 +21,7 @@ class AddItemActivity : AppCompatActivity() {
         binding.bt.setOnClickListener {
             val sdf = SimpleDateFormat("yyyy:MM:dd h:mm a", Locale.getDefault())
 
-            viewModel.addItem(Note(
+                  viewModel.addItem(Note(
                 binding.title.text.toString(),
                 binding.content.text.toString(),
                 sdf.format(Date()),

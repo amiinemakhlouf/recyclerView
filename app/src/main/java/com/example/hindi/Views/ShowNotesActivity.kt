@@ -3,6 +3,7 @@ package com.example.hindi.Views
 import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -17,9 +18,11 @@ import com.example.hindi.utils.OnDeleteItem
 import com.example.hindi.utils.OnNoteItemClickListener
 import com.example.hindi.viewModels.ShowNotesViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 
 @AndroidEntryPoint
-class ShowNotesActivity : AppCompatActivity(), OnNoteItemClickListener, OnDeleteItem {
+class ShowNotesActivity : AppCompatActivity(), OnNoteItemClickListener, OnDeleteItem,TextToSpeech.OnInitListener
+     {
     private lateinit var binding: ActivityShowNotesBinding
     private lateinit var noteAdapter: NotesAdapter
     private val viewModel: ShowNotesViewModel by viewModels()
@@ -29,10 +32,9 @@ class ShowNotesActivity : AppCompatActivity(), OnNoteItemClickListener, OnDelete
         super.onCreate(savedInstanceState)
         binding = ActivityShowNotesBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val noteList = mutableListOf<Note>()
-
         noteAdapter = NotesAdapter(this, viewModel)
-        initRecyclerView(this, viewModel)
+        initRecyclerView()
+        viewModel.textToSpeech= TextToSpeech(this,this)
 
 
         viewModel.mutableListOfNotes.observe(this, Observer {
@@ -51,15 +53,13 @@ class ShowNotesActivity : AppCompatActivity(), OnNoteItemClickListener, OnDelete
     }
 
     override fun noteOnItemClick(position: Int) {
-
-        Toast.makeText(this, "${noteAdapter.dataSEt[position].title}", Toast.LENGTH_LONG).show()
+        viewModel.textToSpeech.speak(noteAdapter.dataSEt[position].body,TextToSpeech.QUEUE_FLUSH,null,null)
     }
-
     override fun onDeleteItem(note: Note) {
         viewModel.deleteNotes(note)
     }
 
-    private fun initRecyclerView(listener: ShowNotesActivity, viewModel: ShowNotesViewModel) {
+    private fun initRecyclerView() {
 
         binding.noteRV.apply {
             layoutManager = LinearLayoutManager(this@ShowNotesActivity)
@@ -67,5 +67,21 @@ class ShowNotesActivity : AppCompatActivity(), OnNoteItemClickListener, OnDelete
         }
     }
 
+         override fun onInit(status: Int) {
 
-}
+             if (status == TextToSpeech.SUCCESS) {
+                 // set US English as language for tts
+                 val result = viewModel.textToSpeech!!.setLanguage(Locale.US)
+
+                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                     Log.e("TTS", "The Language specified is not supported!")
+                 }
+
+             } else {
+                 Log.e("TTS", "Initilization Failed!")
+             }
+         }
+
+
+         }
+
